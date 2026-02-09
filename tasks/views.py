@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from .models import Task
+from .forms import TaskForm
 
 
 def index(request):
@@ -20,10 +21,23 @@ def index(request):
         .order_by('due_date')
         .select_related('category')
     )
-    # Pass both querysets to the template
+    # Handle task creation form
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.completed = False
+            task.is_trashed = False
+            task.save()
+            return redirect('index')
+    else:
+        form = TaskForm()
+
+    # Pass querysets and form to the template
     context = {
         'todo_tasks': todo_tasks,
         'done_tasks': done_tasks,
+        'form': form,
     }
 
     return render(request, 'tasks/index.html', context)
