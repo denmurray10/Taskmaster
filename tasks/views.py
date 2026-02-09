@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
 from .models import Task
 
 
@@ -8,15 +9,63 @@ def index(request):
     Todo tasks and done tasks are both sorted by due date.
     """
     # Get tasks that are NOT completed
-    todo_tasks = Task.objects.filter(completed=False).order_by('due_date').select_related('category')
-    
+    todo_tasks = (
+        Task.objects.filter(completed=False, is_trashed=False)
+        .order_by('due_date')
+        .select_related('category')
+    )
     # Get tasks that ARE completed
-    done_tasks = Task.objects.filter(completed=True).order_by('due_date').select_related('category')
-    
+    done_tasks = (
+        Task.objects.filter(completed=True, is_trashed=False)
+        .order_by('due_date')
+        .select_related('category')
+    )
     # Pass both querysets to the template
     context = {
         'todo_tasks': todo_tasks,
         'done_tasks': done_tasks,
     }
-    
+
     return render(request, 'tasks/index.html', context)
+
+
+def bin_view(request):
+    """Show trashed tasks (recycle bin)."""
+    trashed = (
+        Task.objects.filter(is_trashed=True)
+        .order_by('-trashed_at')
+        .select_related('category')
+    )
+    return render(request, 'tasks/bin.html', {'trashed_tasks': trashed})
+
+
+def delete_task(request, pk):
+    """Soft-delete: move a task to the trash."""
+    task = get_object_or_404(Task, pk=pk)
+    if request.method == 'POST':
+        task.is_trashed = True
+        task.trashed_at = timezone.now()
+        task.save()
+    return redirect('index')
+
+
+def restore_task(request, pk):
+    task = get_object_or_404(Task, pk=pk)
+    if request.method == 'POST':
+        task.is_trashed = False
+        task.trashed_at = None
+        task.save()
+    return redirect('tasks_bin')
+
+
+def hard_delete_task(request, pk):
+    task = get_object_or_404(Task, pk=pk)
+    if request.method == 'POST':
+        task.delete()
+    return redirect('tasks_bin')
+
+
+def empty_bin(request):
+    if request.method == 'POST':
+        Task.objects.filter(is_trashed=True).delete()
+    return redirect('tasks_bin')

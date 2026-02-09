@@ -1,0 +1,69 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Trash - Taskmaster</title>
+        <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    </head>
+    <body>
+        <div class="container mt-4">
+            <h1>Trash</h1>
+            <p><a href="{% url 'index' %}">← Back to tasks</a></p>
+
+            <form
+                method="post"
+                action="{% url 'tasks_empty_bin' %}"
+                style="display: inline"
+            >
+                {% csrf_token %}
+                <button class="btn btn-danger btn-sm" type="submit">
+                    Empty Trash
+                </button>
+            </form>
+
+            <ul class="list-group mt-3">
+                {% for task in trashed_tasks %}
+                <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                >
+                    <div>
+                        <strong>{{ task.title }}</strong><br />
+                        <small class="text-muted"
+                            >Trashed at: {{ task.trashed_at|date:"M d, Y H:i" }}
+                            | Category: {% if task.category %}{{
+                            task.category.name }}{% else %}No Category{% endif
+                            %}</small
+                        >
+                    </div>
+                    <div>
+                        <form
+                            method="post"
+                            action="{% url 'task_restore' task.pk %}"
+                            style="display: inline"
+                        >
+                            {% csrf_token %}
+                            <button class="btn btn-secondary btn-sm">
+                                Restore
+                            </button>
+                        </form>
+                        <form
+                            method="post"
+                            action="{% url 'task_hard_delete' task.pk %}"
+                            style="display: inline; margin-left: 6px"
+                        >
+                            {% csrf_token %}
+                            <button class="btn btn-danger btn-sm">
+                                Delete Permanently
+                            </button>
+                        </form>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="list-group-item">Trash is empty.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </body>
+</html>
