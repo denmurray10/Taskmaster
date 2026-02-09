@@ -1,0 +1,85 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Taskmaster</title>
+        <!-- bootstrap -->
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+            crossorigin="anonymous"
+        />
+        <!-- font-awesome -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+            integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        <!-- custom styles -->
+        <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-12 mt-4 text-center">
+                    <h1 class="display-3 text-center">Taskmaster</h1>
+                </div>
+            </div>
+
+            <!-- Columns for to-do and done go here -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h2>To-Do Tasks</h2>
+                    <ul class="list-group">
+                        {% for task in todo_tasks %}
+                        <li
+                            class="list-group-item d-flex justify-content-between align-items-center"
+                        >
+                            <div>
+                                <strong>{{ task.title }}</strong><br />
+                                <small class="text-muted">Due: {{ task.due_date }} | Category: {% if task.category %}{{ task.category.name }}{% else %}No Category{% endif %}</small>
+                            </div>
+                            <span class="badge bg-warning text-dark"
+                                >Pending</span
+                            >
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No tasks to do!</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h2>Completed Tasks</h2>
+                    <ul class="list-group">
+                        {% for task in done_tasks %}
+                        <li
+                            class="list-group-item d-flex justify-content-between align-items-center"
+                        >
+                            <div>
+                                <strong>{{ task.title }}</strong><br />
+                                <small class="text-muted">Completed | Category: {% if task.category %}{{ task.category.name }}{% else %}No Category{% endif %}</small>
+                            </div>
+                            <span class="badge bg-success">Done</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No completed tasks yet!</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- bootstrap -->
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"
+        ></script>
+    </body>
+</html>
